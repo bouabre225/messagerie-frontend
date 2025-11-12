@@ -1,35 +1,33 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useContext } from "react";
+import { AuthProvider, AuthContext } from "../src/components/Axio";
+import LoginForm from "./components/LoginForm";
+import RegisterForm from "./components/RegisterForm";
+import Chat from "./components/Chat";
 
-function App() {
-  const [count, setCount] = useState(0)
+function AppContent() {
+  const { user } = useContext(AuthContext);
+  const [showRegister, setShowRegister] = useState(false);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+  if (!user)
+    return (
+      <div className="flex flex-col items-center mt-10">
+        {showRegister ? <RegisterForm /> : <LoginForm />}
+        <button
+          onClick={() => setShowRegister(!showRegister)}
+          className="text-blue-600 underline mt-3"
+        >
+          {showRegister ? "Déjà un compte ? Se connecter" : "Créer un compte"}
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    );
+
+  return <Chat />;
 }
 
-export default App
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
