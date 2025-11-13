@@ -1,21 +1,35 @@
 import { AuthContext } from "./Axio";
 import { useState, useContext } from "react";
 import { User, Mail, Lock, UserPlus, ArrowLeft } from 'lucide-react';
-
+import  LoginForm  from "./LoginForm";
+import { useNavigate } from "react-router-dom";
 
 export default function RegisterForm() {
     const { register } = useContext(AuthContext)
     const [ name, setName] =useState("")
     const [ email, setEmail] =useState("")
     const [ password, setPassword] =useState("")
+    const [showLogin, setShowLogin] = useState(false);
+    const [ errors, setErrors] = useState({});
+    const navigate = useNavigate();
+
+    if (showLogin) return <LoginForm />;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+          setErrors({}); // reset avant une nouvelle tentative
+
         try {
             await register({name, email, password});
+            navigate("/chat");
         } catch (error) {
-            console.error(error);
-        }
+// si Laravel renvoie une erreur
+      if (error.response?.data?.errors) {
+        setErrors(error.response.data.errors);
+      } else {
+        setErrors({ general: "Email ou mot de passe incorrect." });
+      }       
+     }
     }
 
     return (
@@ -54,6 +68,8 @@ export default function RegisterForm() {
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 outline-none"
                   />
                 </div>
+                {/* parie pour afficher les erreurs */}
+                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name[0]}</p>}
               </div>
 
               {/* Champ Email */}
@@ -75,6 +91,8 @@ export default function RegisterForm() {
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 outline-none"
                   />
                 </div>
+                {/* parie pour afficher les erreurs */}
+                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email[0]}</p>}
               </div>
 
               {/* Champ Mot de passe */}
@@ -96,6 +114,8 @@ export default function RegisterForm() {
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 outline-none"
                   />
                 </div>
+                {/* parie pour afficher les erreurs */}
+                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password[0]}</p>}
                 <p className="text-xs text-gray-500 mt-1">
                   Minimum 8 caractères recommandés
                 </p>
@@ -119,6 +139,8 @@ export default function RegisterForm() {
                   </button>
                 </label>
               </div>
+                
+                {errors.general && <p className="text-red-600 text-center">{errors.general}</p>}
 
               {/* Bouton d'inscription */}
               <button
@@ -145,7 +167,7 @@ export default function RegisterForm() {
             <div className="mt-6 text-center">
               <p className="text-gray-600">
                 Vous avez déjà un compte ?{' '}
-                <button className="text-purple-600 font-medium hover:text-purple-700 transition duration-200 inline-flex items-center gap-1">
+                <button className="text-purple-600 font-medium hover:text-purple-700 transition duration-200 inline-flex items-center gap-1" onClick={() => setShowLogin(true)}>
                   <ArrowLeft className="w-4 h-4" />
                   Se connecter
                 </button>

@@ -2,12 +2,15 @@ import { AuthContext } from "./Axio";
 import { useState, useContext } from "react";
 import { Mail, Lock, LogIn } from 'lucide-react';
 import RegisterForm from "./RegisterForm";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginForm () {
     const { login} = useContext(AuthContext)
     const [ email, setEmail] =useState("")
     const [ password, setPassword] =useState("")
     const [showRegister, setShowRegister] = useState(false);
+    const navigate = useNavigate();
+    const [errors, setErrors] = useState({});
 
     if (showRegister) return <RegisterForm />;
 
@@ -15,9 +18,14 @@ export default function LoginForm () {
         e.preventDefault();
         try {
             await login(email, password);
+            navigate("/chat");
         } catch (error) {
-            console.error(error);
-        }
+// si Laravel renvoie une erreur
+      if (error.response?.data?.errors) {
+        setErrors(error.response.data.errors);
+      } else {
+        setErrors({ general: "Email ou mot de passe incorrect." });
+      }           }
     }
 
     return (
@@ -55,6 +63,7 @@ export default function LoginForm () {
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 outline-none"
                   />
                 </div>
+                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email[0]}</p>}
               </div>
 
               {/* Champ Mot de passe */}
@@ -75,6 +84,7 @@ export default function LoginForm () {
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 outline-none"
                   />
                 </div>
+                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password[0]}</p>}
               </div>
 
               {/* Lien mot de passe oublié */}
@@ -83,6 +93,8 @@ export default function LoginForm () {
                   Mot de passe oublié ?
                 </button>
               </div>
+
+              {errors.general && <p className="text-red-600 text-center">{errors.general}</p>}
 
               {/* Bouton de connexion */}
               <button
